@@ -16,7 +16,8 @@
   ],
   "host_permissions": [
     "<all_urls>",
-    "http://localhost:8080/*"
+    "http://localhost:8080/*",
+    "https://localhost:8081/*"
   ],
   "background": {
     "service_worker": "background.js"
