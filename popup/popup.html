@@ -1,20 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Privacy Knight</title>
   <link rel="stylesheet" href="popup.css">
+  <meta name="theme-color" content="#121212">
+  <style>
+    html, body {
+      width: 320px;
+      min-height: 400px;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Privacy Knight</h1>
-    <div id="status">Active and monitoring</div>
-    <div class="stats">
-      <div>Last scanned: <span id="lastUrl">None yet</span></div>
-      <div>Login forms detected: <span id="loginCount">0</span></div>
-      <div>Policy links found: <span id="policyCount">0</span></div>
+    <div class="header">
+      <div class="title-section">
+        <div class="shield-icon">🛡️</div>
+        <h1>Privacy Knight</h1>
+      </div>
+      <div class="status-badge active" id="statusBadge">Active</div>
     </div>
-    <button id="toggle">Pause Monitoring</button>
+    
+    <div class="scan-info">
+      <h3>🌐 Last Scanned</h3>
+      <div class="url-display collapsed" id="urlDisplay">None yet</div>
+      <button class="url-toggle" id="urlToggle" style="display: none;">Show More</button>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-icon">🔓</div>
+        <div class="stat-number" id="loginCount">0</div>
+        <div class="stat-label">Login Forms</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">📃</div>
+        <div class="stat-number" id="policyCount">0</div>
+        <div class="stat-label">Policy Links</div>
+      </div>
+    </div>
+    
+    <div class="control-section">
+      <button class="toggle-button active" id="toggle">Activated</button>
+    </div>
   </div>
+  
   <script src="popup.js"></script>
 </body>
 </html>

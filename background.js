@@ -47,7 +47,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "pageData":
       if (!stats.isActive) return;
       
-      // Update stats
       stats = {
         ...stats,
         lastUrl: message.data.url,
@@ -55,32 +54,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         policyLinks: message.data.policyLinks.length
       };
       
-      // Save to storage and notify popup
       chrome.storage.local.set({ stats });
       chrome.runtime.sendMessage({
         type: "statsUpdate",
         data: stats
       });
       
-      // Add to queue for backend
       queue.push(message);
       processQueue();
       break;
-      
+
     case "setActive":
       stats.isActive = message.active;
       chrome.storage.local.set({ stats });
       break;
-      
+
     case "getStats":
       sendResponse(stats);
       break;
   }
-  
-  return true; // Keep message channel open for sendResponse
+
+  return true;
 });
 
-// Initialize
+// Restore saved stats
 chrome.storage.local.get(['stats'], (result) => {
   if (result.stats) stats = { ...stats, ...result.stats };
+});
+
+// 🚀 Open custom popup window on icon click
+chrome.action.onClicked.addListener(() => {
+  chrome.windows.create({
+    url: chrome.runtime.getURL("popup/popup.html"),
+    type: "popup",
+    width: 360,
+    height: 450,
+    top: 100,
+    left: 100,
+    focused: true
+  });
 });
