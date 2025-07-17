@@ -1,4 +1,8 @@
-const API_ENDPOINT = "http://localhost:8080/monitor";
+let API_ENDPOINT = "http://localhost:8080/monitor";
+fetch("http://localhost:8080/monitor", { method: "OPTIONS" })
+  .catch(() => {
+    API_ENDPOINT = "http://localhost:8081/monitor";
+  });
 const MAX_RETRIES = 3;
 const THROTTLE_DELAY = 2000;
 
