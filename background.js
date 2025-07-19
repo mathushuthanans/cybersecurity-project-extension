@@ -12,10 +12,10 @@ let stats = {
   lastUrl: '',
   loginForms: 0,
   policyLinks: 0,
-  isActive: true
+  isActive: true,
+  processedPolicy: null
 };
 
-// Process queue with retry logic
 async function processQueue() {
   if (!stats.isActive || isProcessing || queue.length === 0) return;
   
@@ -27,11 +27,26 @@ async function processQueue() {
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item.data)
+        body: JSON.stringify({
+          url: item.data.url,
+          loginDetected: item.data.loginForms > 0,
+          policyLinks: item.data.policyLinks
+        })
       });
       
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      console.log('Data sent successfully:', item.data.url);
+      
+      const result = await response.json();
+      if (result.textPolicy) {
+        stats.processedPolicy = {
+          url: item.data.url,
+          summary: result.textPolicy,
+          timestamp: new Date().toISOString()
+        };
+        chrome.storage.local.set({ processedPolicy: stats.processedPolicy });
+      }
+      
+      console.log('Data processed successfully:', item.data.url);
       break;
     } catch (error) {
       console.error(`Attempt ${attempt} failed for ${item.data.url}:`, error);
@@ -45,7 +60,6 @@ async function processQueue() {
   setTimeout(processQueue, THROTTLE_DELAY);
 }
 
-// Message handling
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case "pageData":
@@ -76,23 +90,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "getStats":
       sendResponse(stats);
       break;
+
+    case "getProcessedPolicy":
+      sendResponse(stats.processedPolicy);
+      break;
   }
 
   return true;
 });
 
-// Restore saved stats
-chrome.storage.local.get(['stats'], (result) => {
+chrome.storage.local.get(['stats', 'processedPolicy'], (result) => {
   if (result.stats) stats = { ...stats, ...result.stats };
+  if (result.processedPolicy) stats.processedPolicy = result.processedPolicy;
 });
 
-// 🚀 Open custom popup window on icon click
 chrome.action.onClicked.addListener(() => {
   chrome.windows.create({
     url: chrome.runtime.getURL("popup/popup.html"),
     type: "popup",
     width: 360,
-    height: 450,
+    height: 500,
     top: 100,
     left: 100,
     focused: true
